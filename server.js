@@ -3,12 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./src/config/db');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const cookieParser = require('cookie-parser');
+
+// Route imports
 const productRoutes = require('./src/routes/productRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 // Initialize Express
 const app = express();
@@ -20,6 +23,7 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+app.use(cookieParser());
 
 // Swagger configuration
 const swaggerOptions = {
@@ -81,6 +85,13 @@ const swaggerOptions = {
             message: { type: 'string' }
           }
         }
+      },
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
       }
     }
   },
@@ -95,9 +106,12 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reports', reportRoutes);
 
-// Swagger UI
+// Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Server start
+// Server initialization
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API documentation: http://localhost:${PORT}/api-docs`);
+});

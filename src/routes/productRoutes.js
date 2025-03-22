@@ -90,4 +90,29 @@ router.put('/:id', productController.updateProduct);
  */
 router.delete('/:id', productController.deleteProduct);
 
+/**
+ * @swagger
+ * /api/products/search:
+ *   get:
+ *     summary: Search products
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Search results
+ */
+router.get('/search', async (req, res) => {
+  const { q, minPrice, maxPrice, color } = req.query;
+  const filter = {
+    $text: { $search: q },
+    'variants.attributes.color': color,
+    price: { $gte: minPrice || 0, $lte: maxPrice || 10000 }
+  };
+  const products = await Product.find(filter);
+  res.json(products);
+});
+
 module.exports = router;

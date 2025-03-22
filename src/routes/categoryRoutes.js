@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const {
   createCategory,
   getAllCategories,
   getCategoryById,
   updateCategory,
-  deleteCategory,
-} = require("../controllers/categoryController");
+  deleteCategory
+} = require('../controllers/categoryController');
 
 /**
  * @swagger
@@ -23,10 +23,16 @@ const {
  *     responses:
  *       201:
  *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
  *       400:
  *         description: Invalid input
+ *       409:
+ *         description: Category already exists
  */
-router.post("/", createCategory);
+router.post('/', createCategory);
 
 /**
  * @swagger
@@ -43,8 +49,10 @@ router.post("/", createCategory);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Category'
+ *       500:
+ *         description: Server error
  */
-router.get("/", getAllCategories);
+router.get('/', getAllCategories);
 
 /**
  * @swagger
@@ -58,6 +66,7 @@ router.get("/", getAllCategories);
  *         required: true
  *         schema:
  *           type: string
+ *           format: mongoId
  *     responses:
  *       200:
  *         description: Category details
@@ -67,8 +76,10 @@ router.get("/", getAllCategories);
  *               $ref: '#/components/schemas/Category'
  *       404:
  *         description: Category not found
+ *       400:
+ *         description: Invalid ID format
  */
-router.get("/:id", getCategoryById);
+router.get('/:id', getCategoryById);
 
 /**
  * @swagger
@@ -82,6 +93,7 @@ router.get("/:id", getCategoryById);
  *         required: true
  *         schema:
  *           type: string
+ *           format: mongoId
  *     requestBody:
  *       required: true
  *       content:
@@ -91,10 +103,16 @@ router.get("/:id", getCategoryById);
  *     responses:
  *       200:
  *         description: Updated category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
+ *       400:
+ *         description: Invalid input
  *       404:
  *         description: Category not found
  */
-router.put("/:id", updateCategory);
+router.put('/:id', updateCategory);
 
 /**
  * @swagger
@@ -108,12 +126,15 @@ router.put("/:id", updateCategory);
  *         required: true
  *         schema:
  *           type: string
+ *           format: mongoId
  *     responses:
- *       200:
- *         description: Category deleted
+ *       204:
+ *         description: Category deleted successfully
  *       404:
  *         description: Category not found
+ *       400:
+ *         description: Invalid ID format
  */
-router.delete("/:id", deleteCategory);
+router.delete('/:id', deleteCategory);
 
 module.exports = router;
