@@ -28,7 +28,7 @@ Built with **Node.js, Express, and MongoDB,** this API enables users to efficien
 
 ### **1️⃣ Clone the Repository**  
 ```bash
-git https://github.com/PhiLouGii/product-catalog-api.git
+git https://github.com/your-username/product-catalog-api.git
 cd product-catalog-api
 ```
 
