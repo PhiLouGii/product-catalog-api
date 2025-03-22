@@ -135,21 +135,17 @@ Content-Type: application/json
 ]
 ```
 ### Get Low Stock Report
-```GET /api/reports/low-stock?threshold=10```
+```curl -X GET "http://localhost:5001/api/reports/low-stock?threshold=5"```
 
-✅ Response:
+❗Error Response Example:
 ```json
-[
-  {
-    "name": "Premium Yoga Mat",
-    "variants": [
-      {
-        "name": "Ocean Blue",
-        "inventory": 5
-      }
-    ]
+{
+  "success": false,
+  "error": {
+    "code": 400,
+    "message": "Invalid price range"
   }
-]
+}
 ```
 ---
 ## 🧪Testing
