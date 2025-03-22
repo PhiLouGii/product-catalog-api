@@ -79,6 +79,10 @@ npm run dev
 
 ---
 
+## **📝 API Documentation**
+### Base URL
+When running locally, the base URL is: ```http://localhost:5001/api```
+
 ## **📡 API Endpoints**  
 
 ### **🔹 Category Endpoints**  
