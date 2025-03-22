@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const connectDB = require('./src/config/db');
 const productRoutes = require('./src/routes/productRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
+const inventoryRoutes = require('./src/routes/inventoryRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -90,6 +92,8 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
