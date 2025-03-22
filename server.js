@@ -35,9 +35,8 @@ app.use(cors({
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000,
-  standardHeaders: true,
-  legacyHeaders: false,
+  max: 100, // Limit each IP to 100 requests per window
+  message: 'Too many requests - try again later'
 });
 
 // Application middleware
@@ -53,6 +52,7 @@ app.use('/api/products', require('./src/routes/productRoutes'));
 app.use('/api/categories', require('./src/routes/categoryRoutes'));
 app.use('/api/inventory', require('./src/routes/inventoryRoutes'));
 app.use('/api/reports', require('./src/routes/reportRoutes'));
+app.use('/api/', apiLimiter);
 
 // Swagger documentation
 app.use('/api-docs', 

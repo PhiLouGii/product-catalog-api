@@ -216,30 +216,43 @@ router.delete('/:id', productController.deleteProduct);
 router.get('/search', async (req, res) => {
   try {
     const { q, minPrice, maxPrice, color, size } = req.query;
+    
+    // Validate price range
+    if (minPrice > maxPrice) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid price range"
+      });
+    }
+
     const filter = {};
-
+    
     // Text search
-    if (q) filter.$text = { $search: q };
+    if (q) {
+      filter.$or = [
+        { name: new RegExp(q, 'i') },
+        { description: new RegExp(q, 'i') }
+      ];
+    }
 
-    // Price range filter
+    // Numeric filters
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = parseFloat(minPrice);
       if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
-      
-      if (minPrice > maxPrice) {
-        return errorResponse(res, 'Invalid price range', 400);
-      }
     }
 
     // Variant filters
     if (color) filter['variants.attributes.color'] = color;
     if (size) filter['variants.attributes.size'] = size;
 
-    const products = await Product.find(filter);
-    successResponse(res, products);
-  } catch (err) {
-    errorResponse(res, 'Search failed: ' + err.message, 400);
+    const products = await Product.find(filter).populate('categories');
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: "Search failed: " + error.message
+    });
   }
 });
 
