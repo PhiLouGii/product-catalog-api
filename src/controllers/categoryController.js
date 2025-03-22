@@ -81,14 +81,8 @@ exports.updateCategory = async (req, res) => {
 };
 
 exports.getCategoryProducts = async (req, res) => {
-  try {
-    const category = await Category.findByPk(req.params.id, {
-      include: Product
-    });
-    res.json(category.Products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  const products = await Product.find({ categories: req.params.id });
+  res.json(products);
 };
 
 // Delete a category

@@ -79,4 +79,12 @@ router.get('/inventory-movements', getInventoryMovementsReport);
  */
 router.get('/catalog-stats', getCatalogStats);
 
+router.get('/low-stock', async (req, res) => {
+  const threshold = req.query.threshold || 10;
+  const products = await Product.find({
+    'variants.inventory': { $lt: threshold }
+  });
+  res.json(products);
+});
+
 module.exports = router;

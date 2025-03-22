@@ -40,13 +40,13 @@ exports.deleteProduct = async (req, res) => {
 };
 
 exports.getAllProducts = async (req, res) => {
-    try {
-      const products = await productService.getAllProducts();
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+  try {
+    const products = await Product.find().populate('categories');
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 exports.getProducts = async (req, res) => {
     try {
