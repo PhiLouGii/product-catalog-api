@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const variantSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Variant name is required']
+    required: [true, 'Variant name is required'],
+    trim: true
   },
   sku: {
     type: String,
@@ -25,7 +26,8 @@ const variantSchema = new mongoose.Schema({
     size: String,
     color: {
       type: String,
-      required: [true, 'Color attribute is required']
+      required: [true, 'Color attribute is required'],
+      trim: true
     }
   }
 });
@@ -44,7 +46,7 @@ const discountSchema = new mongoose.Schema({
   }
 });
 
-// Add custom validation to discountSchema
+// Discount validation
 discountSchema.path('type').validate(function(value) {
   if (value && !this.value) return false;
   if (!value && this.value) return false;
@@ -56,7 +58,8 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Product name is required'],
     trim: true,
-    maxlength: [100, 'Product name cannot exceed 100 characters']
+    maxlength: [100, 'Product name cannot exceed 100 characters'],
+    index: true
   },
   description: {
     type: String,
@@ -77,12 +80,25 @@ const productSchema = new mongoose.Schema({
 }, { 
   timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true } 
+  toObject: { virtuals: true }
 });
 
-// Keep your existing indexes and virtuals
+// Indexes
 productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });
+productSchema.index({
+  name: 'text',
+  description: 'text',
+  'variants.attributes.color': 'text'
+}, {
+  weights: {
+    name: 5,
+    description: 2,
+    'variants.attributes.color': 1
+  },
+  name: 'product_search_index'
+});
 
+// Virtuals
 productSchema.virtual('finalPrice').get(function() {
   if (!this.discount || !this.discount.type || !this.discount.value) {
     return this.price;

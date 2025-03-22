@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { successResponse, errorResponse } = require('../utils/response');
-const Product = require('../models/Product');
+const { validateProduct } = require('../controllers/productController');
 
 /**
  * @swagger
@@ -15,7 +14,7 @@ const Product = require('../models/Product');
  * @swagger
  * /api/products:
  *   post:
- *     summary: Create a new product
+ *     summary: Create new product
  *     tags: [Products]
  *     requestBody:
  *       required: true
@@ -23,27 +22,15 @@ const Product = require('../models/Product');
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Product'
- *           example:
- *             name: "Premium Wireless Headphones"
- *             description: "Noise-cancelling Bluetooth headphones"
- *             price: 299.99
- *             variants:
- *               - name: "Midnight Black"
- *                 sku: "HP-MB-2023"
- *                 price: 299.99
- *                 inventory: 50
- *                 attributes:
- *                   color: "Black"
- *                   size: "Standard"
  *     responses:
  *       201:
- *         description: Product created successfully
+ *         description: Product created
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Product'
  *       400:
- *         description: Invalid input
+ *         description: Validation error
  *         content:
  *           application/json:
  *             example:
@@ -52,53 +39,52 @@ const Product = require('../models/Product');
  *                 code: 400
  *                 message: "Validation failed: Name is required"
  */
-router.post('/', productController.createProduct);
+router.post('/', validateProduct, productController.createProduct);
+
+/**
+ * @swagger
+ * /api/products/bulk:
+ *   post:
+ *     summary: Create multiple products
+ *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: array
+ *             items:
+ *               $ref: '#/components/schemas/Product'
+ *     responses:
+ *       201:
+ *         description: Products created
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               createdCount: 5
+ *       400:
+ *         description: Bulk operation failed
+ */
+router.post('/bulk', productController.bulkCreateProducts);
 
 /**
  * @swagger
  * /api/products:
  *   get:
- *     summary: Get all products
+ *     summary: Get paginated products
  *     tags: [Products]
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *         description: Items per page
+ *       - $ref: '#/components/parameters/pageParam'
+ *       - $ref: '#/components/parameters/limitParam'
+ *       - $ref: '#/components/parameters/sortParam'
  *     responses:
  *       200:
- *         description: List of products with pagination
+ *         description: Product list
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *                     pages:
- *                       type: integer
+ *               $ref: '#/components/schemas/PaginatedProducts'
  *       500:
  *         description: Server error
  */
@@ -107,17 +93,31 @@ router.get('/', productController.getProducts);
 /**
  * @swagger
  * /api/products/{id}:
- *   put:
- *     summary: Update a product
+ *   get:
+ *     summary: Get product by ID
  *     tags: [Products]
  *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: mongoId
- *         description: MongoDB product ID
+ *       - $ref: '#/components/parameters/productIdParam'
+ *     responses:
+ *       200:
+ *         description: Product details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ */
+router.get('/:id', productController.getProductById);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Update product
+ *     tags: [Products]
+ *     parameters:
+ *       - $ref: '#/components/parameters/productIdParam'
  *     requestBody:
  *       required: true
  *       content:
@@ -126,35 +126,25 @@ router.get('/', productController.getProducts);
  *             $ref: '#/components/schemas/Product'
  *     responses:
  *       200:
- *         description: Product updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
+ *         description: Updated product
  *       400:
- *         description: Invalid input
+ *         description: Validation error
  *       404:
  *         description: Product not found
  */
-router.put('/:id', productController.updateProduct);
+router.put('/:id', validateProduct, productController.updateProduct);
 
 /**
  * @swagger
  * /api/products/{id}:
  *   delete:
- *     summary: Delete a product
+ *     summary: Delete product
  *     tags: [Products]
  *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: mongoId
- *         description: MongoDB product ID
+ *       - $ref: '#/components/parameters/productIdParam'
  *     responses:
  *       204:
- *         description: Product deleted successfully
+ *         description: Product deleted
  *       404:
  *         description: Product not found
  */
@@ -164,96 +154,27 @@ router.delete('/:id', productController.deleteProduct);
  * @swagger
  * /api/products/search:
  *   get:
- *     summary: Search products with filters
+ *     summary: Advanced product search
  *     tags: [Products]
  *     parameters:
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         description: Text search query
- *       - in: query
- *         name: minPrice
- *         schema:
- *           type: number
- *           minimum: 0
- *         description: Minimum price filter
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *           minimum: 0
- *         description: Maximum price filter
- *       - in: query
- *         name: color
- *         schema:
- *           type: string
- *         description: Filter by variant color
- *       - in: query
- *         name: size
- *         schema:
- *           type: string
- *         description: Filter by variant size
+ *       - $ref: '#/components/parameters/searchQuery'
+ *       - $ref: '#/components/parameters/minPriceParam'
+ *       - $ref: '#/components/parameters/maxPriceParam'
+ *       - $ref: '#/components/parameters/categoryParam'
+ *       - $ref: '#/components/parameters/colorParam'
+ *       - $ref: '#/components/parameters/sizeParam'
+ *       - $ref: '#/components/parameters/pageParam'
+ *       - $ref: '#/components/parameters/limitParam'
  *     responses:
  *       200:
- *         description: Successful search results
+ *         description: Search results
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/PaginatedProducts'
  *       400:
- *         description: Invalid search parameters
- *         content:
- *           application/json:
- *             example:
- *               success: false
- *               error:
- *                 code: 400
- *                 message: "Invalid price range"
+ *         description: Invalid filters
  */
-router.get('/search', async (req, res) => {
-  try {
-    const { q, minPrice, maxPrice, color, size } = req.query;
-    
-    // Validate price range
-    if (minPrice > maxPrice) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid price range"
-      });
-    }
-
-    const filter = {};
-    
-    // Text search
-    if (q) {
-      filter.$or = [
-        { name: new RegExp(q, 'i') },
-        { description: new RegExp(q, 'i') }
-      ];
-    }
-
-    // Numeric filters
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseFloat(minPrice);
-      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
-    }
-
-    // Variant filters
-    if (color) filter['variants.attributes.color'] = color;
-    if (size) filter['variants.attributes.size'] = size;
-
-    const products = await Product.find(filter).populate('categories');
-    res.status(200).json({ success: true, data: products });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: "Search failed: " + error.message
-    });
-  }
-});
+router.get('/search', productController.searchProducts);
 
 module.exports = router;
