@@ -1,5 +1,9 @@
 # **Product Catalog API**  
 
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2018.x-brightgreen)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/express-4.x-blue)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.x-green)](https://www.mongodb.com/)
+
 ## **📁Project Overview**  
 The **Product Catalog API** is a comprehensive RESTful API designed to support e-commerce platforms by providing robust endpoints for managing products, categories, inventory, and reporting. 
 
@@ -7,50 +11,154 @@ Built with **Node.js, Express, and MongoDB,** this API enables users to efficien
 
 ---
 
-## **📜 Features**  
-✅ **Product Management** – CRUD operations for products  
-✅ **Category Management** – Organize products into categories  
-✅ **RESTful API Design** – Follows best API design practices  
-✅ **MongoDB Integration** – Uses Mongoose for data handling  
-✅ **Middleware Support** – Error handling with custom middleware  
+## **✨Features**
+- Full CRUD operations for products/categories
+- Product variants (sizes, colours) management
+- Inventory tracking with low-stock alerts
+- Advanced search with filters
+- Discount pricing support
+- Comprehensive API documentation
 
 ---
 
-## **🛠️ Tech Stack**  
+## **🛠️Technologies**  
 - **Backend:** Node.js, Express.js  
 - **Database:** MongoDB (Mongoose ORM)  
-- **API Testing:** Thunder Client / Postman  
-- **Development Tools:** Nodemon, dotenv  
+- **API Testing:** Postman  
+- **Development Tools:** Nodemon, dotenv
+- Swagger/OpenAPI 
 
 ---
+## **🚀Getting Started**
+### Prerequisites
+- Node.js v18+
+- MongoDB Atlas Account
+- Postman
 
-## **🚀 Installation & Setup**  
-
-### **1️⃣ Clone the Repository**  
+## **⚙️Installation**
+### **1️. Clone the Repository**  
 ```bash
 git https://github.com/your-username/product-catalog-api.git
 cd product-catalog-api
 ```
 
-### **2️⃣ Install Dependencies**  
+### **2️. Install Dependencies**  
 ```bash
 npm install
 ```
 
-### **3️⃣ Configure Environment Variables**  
+### **3️. Configure Environment Variables**  
 Create a `.env` file in the root directory and add:  
 ```
 MONGO_URI=mongodb://localhost:27017/product-catalog
 PORT=5001
 ```
 
-### **4️⃣ Start the Server**  
+### **4️. Start the Server**  
 ```bash
-npm run dev
+npm start
 ```
-✅ Server runs on **http://localhost:5001**  
+---
+## 📑API Documentation
+Interactive documentation is available at:
+```http://localhost:5001/api-docs```
 
 ---
+
+## **🕸️API Endpoints**  
+
+### **Category Endpoints**  
+| Method | Endpoint                | Description                 |
+|--------|-------------------------|-----------------------------|
+| POST   | `/api/categories`       | Create a new category       |
+| GET    | `/api/categories`       | Get all categories          |
+| GET    | `/api/categories/:id`   | Get a single category       |
+| PUT    | `/api/categories/:id`   | Update a category           |
+| DELETE | `/api/categories/:id`   | Delete a category           |
+
+### **Product Endpoints**  
+| Method | Endpoint                | Description                 |
+|--------|-------------------------|-----------------------------|
+| POST   | `/api/products`         | Create a new product        |
+| GET    | `/api/products`         | Get all products            |
+| GET    | `/api/products/:id`     | Get a single product        |
+| GET    | `/api/products/search`  | Search products             |
+| PUT    | `/api/products/:id`     | Update a product            |
+| DELETE | `/api/products/:id`     | Delete a product            |
+
+---
+
+## **💡Example API Requests**  
+POST /products
+Content-Type: application/json 
+```json
+{
+  "name": "Wireless Headphones",
+  "price": 199.99,
+  "categories": ["64a1b2c3d4e5f6a7b8c9d0e1"],
+  "variants": [
+    {
+      "name": "Black",
+      "sku": "HP-BLK-001",
+      "price": 199.99,
+      "inventory": 50,
+      "attributes": {
+        "color": "black"
+      }
+    }
+  ]
+}
+```
+✅ Response: `201 Created`
+```json
+{
+  "_id": "64cb13d8f3a7d62a8872a3f2",
+  "name": "Wireless Headphones",
+  "price": 199.99,
+  "variants": [...],
+  "createdAt": "2023-08-01T12:34:56.789Z"
+}
+```
+
+### Search Products
+```GET /products/search?q=wireless&minPrice=150&maxPrice=250```
+
+✅ Response:
+```json
+[
+  {
+    "_id": "64cb13d8f3a7d62a8872a3f2",
+    "name": "Wireless Headphones",
+    "price": 199.99,
+    "finalPrice": 199.99
+  }
+]
+```
+### Get Low Stock Report
+```GET /api/reports/low-stock?threshold=10```
+
+✅ Response:
+```json
+[
+  {
+    "name": "Premium Yoga Mat",
+    "variants": [
+      {
+        "name": "Ocean Blue",
+        "inventory": 5
+      }
+    ]
+  }
+]
+```
+---
+## 🧪Testing
+Run test suite:
+```bash
+npm test
+```
+---
+
 
 ## **📂 Project Structure**  
 ```
@@ -60,14 +168,28 @@ npm run dev
 │   ├── models            # Mongoose schemas
 │   │   ├── Product.js
 │   │   ├── Category.js
+│   │   ├── Inventory.js
+│   │   ├── User.js
+│   │   ├── Variant.js
 │   ├── routes            # API routes
 │   │   ├── productRoutes.js
 │   │   ├── categoryRoutes.js
+│   │   ├── inventoryRoutes.js
+│   │   ├── reportRoutes.js
 │   ├── controllers       # Business logic for API endpoints
 │   │   ├── productController.js
 │   │   ├── categoryController.js
+│   │   ├── inventoryController.js
+│   │   ├── reportController.js
 │   ├── middlewares       # Middleware functions
 │   │   ├── errorHandler.js
+│   │   ├── response.js
+│   │   ├── upload.js
+│   │   ├── validateRequest.js
+│   ├── utils
+│   │   ├── errors.js
+│   │   ├── helpers.js
+│   │   ├── validators.js       
 │   ├── config            # Database connection setup
 │   │   ├── db.js
 │   ├── app.js            # Express app setup
@@ -79,68 +201,25 @@ npm run dev
 
 ---
 
-## **📝 API Documentation**
-### Base URL
-When running locally, the base URL is: ```http://localhost:5001/api```
+## 🛑Assumptions & Limitations
+### Assumptions
+1. All prices are stored in GBP
+2. Product variants share the base product's categories
+3. Discounts apply to the base product price only
+4. Inventory tracking is at variant level only
 
-## **📡 API Endpoints**  
-
-### **🔹 Category Endpoints**  
-| Method | Endpoint                | Description                 |
-|--------|-------------------------|-----------------------------|
-| POST   | `/api/categories`       | Create a new category       |
-| GET    | `/api/categories`       | Get all categories          |
-| GET    | `/api/categories/:id`   | Get a single category       |
-| PUT    | `/api/categories/:id`   | Update a category           |
-| DELETE | `/api/categories/:id`   | Delete a category           |
-
-### **🔹 Product Endpoints**  
-| Method | Endpoint                | Description                 |
-|--------|-------------------------|-----------------------------|
-| POST   | `/api/products`         | Create a new product        |
-| GET    | `/api/products`         | Get all products            |
-| GET    | `/api/products/:id`     | Get a single product        |
-| PUT    | `/api/products/:id`     | Update a product            |
-| DELETE | `/api/products/:id`     | Delete a product            |
+### Limitations
+1. Search is case-sensitive
+2. No transaction history tracking
 
 ---
 
-## **📊 Example API Requests**  
+## ❌Error Handling
+The API returns appropriate HTTP status codes and error messages for various scenarios, including:
 
-### **1️⃣ Create a Product (POST)**
-**URL:** `http://localhost:5001/api/products`  
-**Body (JSON):**  
-```json
-{
-  "name": "Laptop",
-  "price": 1200,
-  "description": "A high-performance laptop",
-  "category": "Electronics"
-}
-```
-✅ Response: `201 Created`
-
----
-
-## **🛠️ Challenges & Solutions**  
-
-### **🔸 Issue: MongoDB Connection Error**
-**Solution:**  
-- Ensure MongoDB is installed and running  
-- Verify `MONGO_URI` in `.env` file  
-
-### **🔸 Issue: Data Not Saving in Database**
-**Solution:**  
-- Ensure the request is sending **JSON format**  
-- Add `console.log(req.body)` in controllers to debug
-- Check The Method used if is correct one 
-
----
-
-## **📜 License**  
-This project is licensed under the **MIT License**.  
-
----
+1. 400 Bad Request: For invalid request data or validation errors.
+2. 404 Not Found: For resources that do not exist.
+3. 500 Internal Server Error: For unexpected server errors.
 
 ## **📞 Contact**  
 For questions or contact:  
