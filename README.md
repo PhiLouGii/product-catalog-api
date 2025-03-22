@@ -1,7 +1,9 @@
 # **Product Catalog API**  
 
-## **📌 Project Overview**  
-The **Product Catalog API** is a RESTful API built with **Node.js, Express, and MongoDB**. It allows users to manage **products** and **categories**, performing CRUD operations efficiently.  
+## **📁Project Overview**  
+The **Product Catalog API** is a comprehensive RESTful API designed to support e-commerce platforms by providing robust endpoints for managing products, categories, inventory, and reporting. 
+
+Built with **Node.js, Express, and MongoDB,** this API enables users to efficiently perform CRUD operations on products and categories while ensuring seamless inventory management and insightful reporting.
 
 ---
 
