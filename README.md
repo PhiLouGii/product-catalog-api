@@ -211,11 +211,26 @@ npm test
 ---
 
 ## ❌Error Handling
-The API returns appropriate HTTP status codes and error messages for various scenarios, including:
+The API uses standard HTTP status codes:
 
-1. 400 Bad Request: For invalid request data or validation errors.
-2. 404 Not Found: For resources that do not exist.
-3. 500 Internal Server Error: For unexpected server errors.
+200: Success
+201: Created
+400: Bad Request
+401: Unauthorized
+403: Forbidden
+404: Not Found
+500: Internal Server Error
+
+All errors return a consistent format:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error description"
+  }
+}
+```
 
 ## **📞 Contact**  
 For questions or contact:  
