@@ -1,11 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getLowStockReport,
-  getInventoryValueReport,
-  getInventoryMovementsReport,
-  getCatalogStats,
-} = require('../controllers/reportController');
+const Product = require('../models/Product');
 
 /**
  * @swagger
@@ -18,73 +13,48 @@ const {
  * @swagger
  * /api/reports/low-stock:
  *   get:
- *     summary: Get low stock report
- *     tags: [Reports]
- *     description: Fetches a report of products and variants with stock below or at their low stock threshold
- *     responses:
- *       200:
- *         description: Low stock report
- */
-router.get('/low-stock', getLowStockReport);
-
-/**
- * @swagger
- * /api/reports/inventory-value:
- *   get:
- *     summary: Get inventory value report
- *     tags: [Reports]
- *     description: Calculates the total value of inventory and breakdown by product
- *     responses:
- *       200:
- *         description: Inventory value report
- */
-router.get('/inventory-value', getInventoryValueReport);
-
-/**
- * @swagger
- * /api/reports/inventory-movements:
- *   get:
- *     summary: Get inventory movements report
+ *     summary: Get low stock products
  *     tags: [Reports]
  *     parameters:
  *       - in: query
- *         name: startDate
+ *         name: threshold
  *         schema:
- *           type: string
- *           format: date
- *         description: Start date for report period
- *       - in: query
- *         name: endDate
- *         schema:
- *           type: string
- *           format: date
- *         description: End date for report period
- *     description: Provides a report of inventory movement activities for a specified period
+ *           type: integer
+ *           minimum: 0
+ *         example: 10
  *     responses:
  *       200:
- *         description: Inventory movements report
+ *         description: Low stock products
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 - name: "Product A"
+ *                   variants:
+ *                     - sku: "A123"
+ *                       inventory: 5
+ *       500:
+ *         description: Server error
  */
-router.get('/inventory-movements', getInventoryMovementsReport);
-
-/**
- * @swagger
- * /api/reports/catalog-stats:
- *   get:
- *     summary: Get catalog statistics
- *     tags: [Reports]
- *     description: Provides statistics about the product catalog
- *     responses:
- *       200:
- *         description: Catalog statistics
- */
-router.get('/catalog-stats', getCatalogStats);
-
 router.get('/low-stock', async (req, res) => {
-  const threshold = req.query.threshold || 10;
-  const products = await Product.find({
-    'variants.inventory': { $lt: threshold }
-  });
-  res.json(products);
+  try {
+    const threshold = parseInt(req.query.threshold) || 10;
+    
+    const products = await Product.find({
+      'variants.inventory': { $lt: threshold }
+    }).populate('categories');
+
+    res.json({ 
+      success: true,
+      data: products
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to generate low stock report"
+    });
+  }
 });
 
 module.exports = router;

@@ -137,6 +137,16 @@ router.put('/:id', updateCategory);
  */
 router.delete('/:id', deleteCategory);
 
+router.get('/:id/products', async (req, res, next) => {
+  try {
+    const products = await Product.find({ categories: req.params.id })
+      .populate('categories');
+    res.json({ success: true, data: products });
+  } catch (error) {
+    next(new Error('Failed to fetch category products'));
+  }
+});
+
 router.get('/:id/products', categoryController.getCategoryProducts);
 
 module.exports = router;

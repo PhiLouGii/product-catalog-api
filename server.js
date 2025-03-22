@@ -7,23 +7,13 @@ const rateLimit = require('express-rate-limit');
 const connectDB = require('./src/config/db');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const { ApiError, errorHandler } = require('./src/utils/errors');
-const responseMiddleware = require('./src/middlewares/response');
-const successResponse = responseMiddleware.successResponse;
-const errorResponse = responseMiddleware.errorResponse;
+const { errorHandler } = require('./src/utils/errors');
 
-// Initialize Express 
+// Initialize Express
 const app = express();
 
 // Database connection
 connectDB();
-
-// Response middleware setup
-app.use((req, res, next) => {
-  res.success = (data, statusCode) => successResponse(res, data, statusCode);
-  res.error = (error, statusCode) => errorResponse(res, error, statusCode);
-  next();
-});
 
 // Security middleware
 app.use(helmet());
@@ -34,8 +24,8 @@ app.use(cors({
 
 // Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many requests - try again later'
 });
 
@@ -44,43 +34,37 @@ app.use(express.json());
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use('/api/', apiLimiter);
 
-// Swagger configuration (keep your existing setup)
-// ... [your existing swagger code] ...
+// Swagger configuration
+const swaggerSpec = swaggerJsdoc({
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Product Catalog API',
+      version: '1.0.0',
+      description: 'API for managing e-commerce products'
+    },
+    servers: [{ url: `http://localhost:${process.env.PORT || 5001}` }]
+  },
+  apis: ['./src/routes/*.js']
+});
 
 // Routes
 app.use('/api/products', require('./src/routes/productRoutes'));
 app.use('/api/categories', require('./src/routes/categoryRoutes'));
-app.use('/api/inventory', require('./src/routes/inventoryRoutes'));
 app.use('/api/reports', require('./src/routes/reportRoutes'));
-app.use('/api/', apiLimiter);
 
-// Swagger documentation
-app.use('/api-docs', 
-  swaggerUi.serve, 
-  swaggerUi.setup(swaggerSpec, {
-    explorer: true,
-    customSiteTitle: 'Product Catalog API Docs'
-  })
-);
+// Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// 404 handler
+// Error handling
 app.use((req, res, next) => {
-  next(new ApiError(404, `Route ${req.originalUrl} not found`));
+  next(new Error(`Route ${req.originalUrl} not found`));
 });
 
-// Global error handler (MUST BE LAST MIDDLEWARE)
 app.use(errorHandler);
 
-// Server initialization
+// Server start
 const PORT = process.env.PORT || 5001;
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode`);
-  console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  server.close(() => process.exit(1));
-});
-
-module.exports = server;
