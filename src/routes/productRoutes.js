@@ -105,14 +105,24 @@ router.delete('/:id', productController.deleteProduct);
  *         description: Search results
  */
 router.get('/search', async (req, res) => {
-  const { q, minPrice, maxPrice, color } = req.query;
-  const filter = {
-    $text: { $search: q },
-    'variants.attributes.color': color,
-    price: { $gte: minPrice || 0, $lte: maxPrice || 10000 }
-  };
-  const products = await Product.find(filter);
-  res.json(products);
+  try {
+    const { q, minPrice, maxPrice, color, size } = req.query;
+    const filter = {};
+
+    if (q) filter.$text = { $search: q };
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseFloat(minPrice);
+      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+    if (color) filter['variants.attributes.color'] = color;
+    if (size) filter['variants.attributes.size'] = size;
+
+    const products = await Product.find(filter);
+    successResponse(res, products);
+  } catch (err) {
+    errorResponse(res, 'Search failed: ' + err.message, 400);
+  }
 });
 
 module.exports = router;

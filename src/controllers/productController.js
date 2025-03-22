@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const { successResponse, errorResponse } = require('../middlewares/response');
 
 exports.createProduct = async (req, res) => {
     try {
@@ -35,3 +36,28 @@ exports.deleteProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.getProducts = async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+  
+      const [products, total] = await Promise.all([
+        Product.find().skip(skip).limit(limit),
+        Product.countDocuments()
+      ]);
+  
+      successResponse(res, {
+        data: products,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      });
+    } catch (err) {
+      errorResponse(res, 'Failed to fetch products', 500);
+    }
+  };
