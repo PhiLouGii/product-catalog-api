@@ -137,4 +137,6 @@ router.put('/:id', updateCategory);
  */
 router.delete('/:id', deleteCategory);
 
+router.get('/:id/products', categoryController.getCategoryProducts);
+
 module.exports = router;

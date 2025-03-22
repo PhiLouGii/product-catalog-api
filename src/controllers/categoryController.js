@@ -80,6 +80,17 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
+exports.getCategoryProducts = async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id, {
+      include: Product
+    });
+    res.json(category.Products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Delete a category
 exports.deleteCategory = async (req, res) => {
   try {

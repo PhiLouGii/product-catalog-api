@@ -1,4 +1,6 @@
 const Product = require('../models/Product');
+const ProductService = require('../services/ProductService');
+const productService = new ProductService();
 const { successResponse, errorResponse } = require('../middlewares/response');
 
 exports.createProduct = async (req, res) => {
@@ -36,6 +38,15 @@ exports.deleteProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.getAllProducts = async (req, res) => {
+    try {
+      const products = await productService.getAllProducts();
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 exports.getProducts = async (req, res) => {
     try {

@@ -8,7 +8,7 @@ const {
   getInventoryLevels,
 } = require('../controllers/inventoryController');
 const { inventoryTransactionValidationRules } = require('../utils/validators');
-const validateRequest = require('../middleware/validateRequest');
+const validateRequest = require('../middlewares/validateRequest');
 
 /**
  * @swagger
