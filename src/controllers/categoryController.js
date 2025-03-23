@@ -1,5 +1,6 @@
 const Category = require("../models/Category");
 const Product = require("../models/Product");
+const { successResponse } = require('../middlewares/response');
 
 // Create a new category
 exports.createCategory = async (req, res) => {
@@ -80,9 +81,13 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-exports.getCategoryProducts = async (req, res) => {
-  const products = await Product.find({ categories: req.params.id });
-  res.json(products);
+exports.getCategoryProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({ categories: req.params.id });
+    successResponse(res, products);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Delete a category

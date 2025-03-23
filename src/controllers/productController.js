@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
-const ApiError = require('../utils/ApiError');
+const { ApiError } = require('../utils/errors');
 const { successResponse } = require('../middlewares/response');
 
 // Validation middleware
