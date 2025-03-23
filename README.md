@@ -63,6 +63,14 @@ npm start
 Interactive documentation is available at:
 ```http://localhost:5001/api-docs```
 
+## 📸 Documentation Screenshots
+
+### MongoDB Atlas Implementation
+![MongoDB Screenshot](./docs/images/mongodb-img.png)
+
+### Swagger/OpenAPI Endpoints
+![Swagger UI](./docs/images/swagger_endpoints(1).png)
+
 ---
 
 ## **🕸️API Endpoints**  
